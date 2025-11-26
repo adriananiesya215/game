@@ -111,7 +111,7 @@
     font-size: 14px;
   }
 
-  .petal {
+  .petal, .confetti {
     position: absolute;
     width: 20px;
     height: 20px;
@@ -119,9 +119,19 @@
     animation: drop 2s linear forwards;
   }
 
+  .confetti {
+    font-size: 24px;
+    animation: confettiDrop 3s linear forwards;
+  }
+
   @keyframes drop {
     0% { transform: translateY(0) rotate(0deg); opacity: 1; }
     100% { transform: translateY(250px) rotate(360deg); opacity: 0; }
+  }
+
+  @keyframes confettiDrop {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(400px) rotate(720deg) scale(1.2); opacity: 0; }
   }
 
   @media(max-width:520px){
@@ -202,9 +212,13 @@ function checkMatch(){
     first.removeEventListener('click', ()=>flipCard);
     second.removeEventListener('click', ()=>flipCard);
     resetTurn();
+
+    // Board complete celebration
     if(matches === scents.length) {
       document.getElementById('status').textContent = "You found all scents! 🎉";
+      triggerConfetti();
     }
+
   } else {
     lock = true;
     setTimeout(()=> {
@@ -228,6 +242,7 @@ document.getElementById('reset').addEventListener('click', ()=> {
   shuffle(cards); render(); matches=0; document.getElementById('status').textContent='Find all matching scent pairs!';
 });
 
+// Petals & fruits drop animation
 function triggerPetals(card){
   for(let i=0;i<8;i++){
     const petal = document.createElement('div');
@@ -240,9 +255,23 @@ function triggerPetals(card){
   }
 }
 
+// Full board confetti celebration
+function triggerConfetti(){
+  for(let i=0;i<50;i++){
+    const confetti = document.createElement('div');
+    confetti.className='confetti';
+    confetti.textContent = ['✨','💮','🍃','🛁','🌸'][Math.floor(Math.random()*5)];
+    confetti.style.left = Math.random()*window.innerWidth + 'px';
+    confetti.style.top = '-50px';
+    document.body.appendChild(confetti);
+    setTimeout(()=> document.body.removeChild(confetti), 3000);
+  }
+}
+
 render();
 </script>
 
 </body>
 </html>
+
 
