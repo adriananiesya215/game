@@ -12,8 +12,9 @@
     align-items: center;
     padding: 20px;
     margin: 0;
-    background: #fdf9f6; /* soft spa-like background */
+    background: #fdf9f6;
     overflow-x: hidden;
+    overflow-y: hidden;
   }
 
   h1 {
@@ -92,7 +93,7 @@
     border-radius: 8px;
     border: none;
     cursor: pointer;
-    display: none; /* hidden by default */
+    display: none;
   }
 
   #status {
@@ -113,15 +114,19 @@
 
   .petal, .confetti {
     position: absolute;
+    pointer-events: none;
+  }
+
+  .petal {
     width: 20px;
     height: 20px;
-    pointer-events: none;
     animation: drop 2s linear forwards;
+    font-size: 20px;
   }
 
   .confetti {
     font-size: 24px;
-    animation: confettiDrop 3s linear forwards;
+    animation: floatDown 5s linear forwards;
   }
 
   @keyframes drop {
@@ -129,9 +134,9 @@
     100% { transform: translateY(250px) rotate(360deg); opacity: 0; }
   }
 
-  @keyframes confettiDrop {
+  @keyframes floatDown {
     0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(400px) rotate(720deg) scale(1.2); opacity: 0; }
+    100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
   }
 
   @media(max-width:520px){
@@ -159,7 +164,6 @@ const scents = [
   {name:'Coconut', url:'https://2024251536.wixsite.com/mysite/product-page/ceramic-flower-vase'}
 ];
 
-// Duplicate scents for pairs
 let cards = scents.concat(scents).map((c,i)=>({...c, id:i+1}));
 shuffle(cards);
 
@@ -180,7 +184,6 @@ function createCard(item){
       </div>
     </div>
   `;
-
   el.addEventListener('click', ()=> flipCard(el));
   return el;
 }
@@ -202,7 +205,6 @@ function checkMatch(){
   const a=first.dataset.name, b=second.dataset.name;
   if(a===b){
     matches +=1;
-    // Show shop buttons
     first.querySelector('.shop-btn').style.display='inline-block';
     second.querySelector('.shop-btn').style.display='inline-block';
 
@@ -213,10 +215,9 @@ function checkMatch(){
     second.removeEventListener('click', ()=>flipCard);
     resetTurn();
 
-    // Board complete celebration
     if(matches === scents.length) {
       document.getElementById('status').textContent = "You found all scents! 🎉";
-      triggerConfetti();
+      triggerConfettiMagical();
     }
 
   } else {
@@ -242,7 +243,6 @@ document.getElementById('reset').addEventListener('click', ()=> {
   shuffle(cards); render(); matches=0; document.getElementById('status').textContent='Find all matching scent pairs!';
 });
 
-// Petals & fruits drop animation
 function triggerPetals(card){
   for(let i=0;i<8;i++){
     const petal = document.createElement('div');
@@ -255,16 +255,16 @@ function triggerPetals(card){
   }
 }
 
-// Full board confetti celebration
-function triggerConfetti(){
-  for(let i=0;i<50;i++){
+function triggerConfettiMagical(){
+  for(let i=0;i<80;i++){
     const confetti = document.createElement('div');
     confetti.className='confetti';
-    confetti.textContent = ['✨','💮','🍃','🛁','🌸'][Math.floor(Math.random()*5)];
+    confetti.textContent = ['✨','💮','🍃','🛁','🌸','🍊'][Math.floor(Math.random()*6)];
     confetti.style.left = Math.random()*window.innerWidth + 'px';
     confetti.style.top = '-50px';
+    confetti.style.fontSize = (15 + Math.random()*20) + 'px';
     document.body.appendChild(confetti);
-    setTimeout(()=> document.body.removeChild(confetti), 3000);
+    setTimeout(()=> document.body.removeChild(confetti), 5000);
   }
 }
 
@@ -273,5 +273,6 @@ render();
 
 </body>
 </html>
+
 
 
