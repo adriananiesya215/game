@@ -3,95 +3,255 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Bath Garden — Scent Match Game</title>
+<title>Bath Garden – Scent Match Game</title>
+
 <style>
-  body{font-family:Arial,Helvetica,sans-serif;display:flex;flex-direction:column;align-items:center;padding:20px;margin:0;background:#faf8f6}
-  h1{margin-bottom:6px}
-  #board{display:grid;grid-template-columns:repeat(4,120px);gap:12px;margin-top:16px}
-  .card{width:120px;height:140px;background:#fff;border-radius:10px;box-shadow:0 4px 8px rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;user-select:none}
-  .card .front,.card .back{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:10px}
-  .card .front{background:#f4f2f1;font-size:18px;padding:10px}
-  .card .back{background:linear-gradient(135deg,#fdf6f0,#fff);transform:rotateY(180deg)}
-  .card.flipped .front{transform:rotateY(180deg);opacity:0}
-  .card.flipped .back{transform:rotateY(0);opacity:1}
-  .hidden{visibility:hidden}
-  #status{margin-top:14px}
-  button{margin-top:10px;padding:8px 14px;border-radius:8px;border:0;background:#6b8e86;color:#fff;cursor:pointer}
-  @media(max-width:520px){#board{grid-template-columns:repeat(2,140px)}.card{width:140px;height:160px}}
+  body {
+    font-family: 'Poppins', Arial, sans-serif;
+    background: linear-gradient(180deg, #f8f5f1, #fff);
+    margin: 0;
+    padding: 30px;
+    text-align: center;
+  }
+
+  h1 {
+    font-weight: 600;
+    margin-bottom: 5px;
+    font-size: 28px;
+    color: #6b796f;
+  }
+
+  #subtitle {
+    font-size: 15px;
+    color: #a09a95;
+    margin-bottom: 25px;
+  }
+
+  #board {
+    display: grid;
+    grid-template-columns: repeat(4, 115px);
+    gap: 14px;
+    justify-content: center;
+  }
+
+  .card {
+    width: 115px;
+    height: 140px;
+    background: #fff;
+    border-radius: 14px;
+    perspective: 1000px;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+  }
+
+  .inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 14px;
+    position: absolute;
+    transform-style: preserve-3d;
+    transition: transform 0.6s ease;
+  }
+
+  .flipped .inner {
+    transform: rotateY(180deg);
+  }
+
+  .front, .back {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    border-radius: 14px;
+  }
+
+  /* Hidden side with emoji only */
+  .front {
+    background: #f2efea;
+  }
+
+  /* Revealed side with name */
+  .back {
+    background: #ffffff;
+    transform: rotateY(180deg);
+    color: #6b8e86;
+    font-size: 18px;
+    padding: 10px;
+    font-weight: 500;
+  }
+
+  #status {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #6b8e86;
+    font-weight: 500;
+  }
+
+  #reset {
+    margin-top: 18px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    background: #6b8e86;
+    color: #fff;
+    border: 0;
+    cursor: pointer;
+    font-size: 15px;
+    transition: 0.2s;
+  }
+
+  #reset:hover {
+    background: #56776f;
+  }
+
+  /* Confetti celebration */
+  @keyframes confetti {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(300px) rotate(360deg); opacity: 0; }
+  }
+
+  .confetti {
+    position: fixed;
+    width: 12px;
+    height: 12px;
+    background: #f9d7c3;
+    border-radius: 50%;
+    top: -20px;
+    left: calc(50% - 6px);
+    animation: confetti 2.5s linear infinite;
+    pointer-events: none;
+  }
+
+  @media(max-width: 520px) {
+    #board {
+      grid-template-columns: repeat(2, 150px);
+    }
+    .card {
+      width: 150px;
+      height: 170px;
+    }
+  }
 </style>
 </head>
+
 <body>
-  <h1>Scent Match — Bath Garden</h1>
-  <div id="status">Find all matching scent pairs!</div>
-  <div id="board"></div>
-  <button id="reset">Restart Game</button>
+
+<h1>🌸 Bath Garden Scent Match</h1>
+<div id="subtitle">Flip the cards and find your fragrance twins</div>
+
+<div id="board"></div>
+<div id="status">Find all matching scent pairs ✨</div>
+<button id="reset">Restart Game</button>
 
 <script>
 const scents = [
-  {name:'Rose', emoji:'🌹'}, {name:'Lavender', emoji:'💜'},
-  {name:'Citrus', emoji:'🍊'}, {name:'Ocean', emoji:'🌊'},
-  {name:'Jasmine', emoji:'🌼'}, {name:'Mint', emoji:'🌿'},
-  {name:'Vanilla', emoji:'🍨'}, {name:'Peony', emoji:'🌸'}
+  {name:'Rose Bloom', emoji:'🌹'},
+  {name:'Lavender Calm', emoji:'💜'},
+  {name:'Citrus Fresh', emoji:'🍊'},
+  {name:'Ocean Breeze', emoji:'🌊'},
+  {name:'Jasmine Mist', emoji:'🌼'},
+  {name:'Mint Leaf', emoji:'🌿'},
+  {name:'Soft Vanilla', emoji:'🍨'},
+  {name:'Peony Petal', emoji:'🌸'}
 ];
-// duplicate and shuffle
-let cards = [];
-scents.forEach(s=>cards.push({...s}), c=>cards.push({...s}));
-cards = cards.concat(cards.slice(0,0)); // no-op safe
-cards = scents.concat(scents).map((c,i)=>({...c, id:i+1}));
+
+let cards = [...scents, ...scents];
 shuffle(cards);
 
 const board = document.getElementById('board');
-let first=null, second=null, lock=false, matches=0;
+let first = null, second = null, lock = false, matches = 0;
 
 function createCard(item){
-  const el = document.createElement('div');
-  el.className='card';
-  el.dataset.name = item.name;
-  el.innerHTML = `<div class="front">${item.emoji}</div><div class="back">${item.name}</div>`;
-  el.addEventListener('click', ()=> flipCard(el));
-  return el;
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="inner">
+      <div class="front">${item.emoji}</div>
+      <div class="back">${item.name}</div>
+    </div>
+  `;
+  card.dataset.name = item.name;
+  card.addEventListener('click', ()=> flipCard(card));
+  return card;
 }
+
 function render(){
   board.innerHTML='';
   cards.forEach(c=> board.appendChild(createCard(c)));
 }
-function flipCard(el){
-  if(lock || el.classList.contains('flipped') || el===first) return;
-  el.classList.add('flipped');
-  if(!first){ first = el; return; }
-  second = el;
+
+function flipCard(card){
+  if(lock || card.classList.contains('flipped') || card === first) return;
+  card.classList.add('flipped');
+
+  if(!first){ first = card; return; }
+  second = card;
   checkMatch();
 }
+
 function checkMatch(){
-  const a=first.dataset.name, b=second.dataset.name;
-  if(a===b){
-    matches +=1;
-    first.removeEventListener('click', ()=>flipCard);
-    second.removeEventListener('click', ()=>flipCard);
-    resetTurn();
-    if(matches === scents.length) {
-      document.getElementById('status').textContent = "You found all scents — nice! 🎉";
-    }
+  if(first.dataset.name === second.dataset.name){
+    matches++;
+    setTimeout(() => {
+      first.style.visibility = 'hidden';
+      second.style.visibility = 'hidden';
+      resetTurn();
+      if(matches === scents.length){
+        winGame();
+      }
+    }, 600);
   } else {
     lock = true;
-    setTimeout(()=> {
+    setTimeout(()=>{
       first.classList.remove('flipped');
       second.classList.remove('flipped');
       resetTurn();
     }, 900);
   }
 }
-function resetTurn(){ [first,second]=[null,null]; lock=false; }
+
+function resetTurn(){ first = null; second = null; lock = false; }
+
 function shuffle(array){
-  for(let i=array.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [array[i],array[j]]=[array[j],array[i]];
+  for(let i=array.length-1; i>0; i--){
+    const j = Math.floor(Math.random() * (i+1));
+    [array[i], array[j]] = [array[j], array[i]];
   }
 }
+
+function winGame(){
+  document.getElementById('status').textContent = "✨ You matched them all — beautiful senses unlocked!";
+  launchConfetti();
+}
+
+function launchConfetti(){
+  for(let i=0;i<20;i++){
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.animationDelay = Math.random() + 's';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 2500);
+  }
+}
+
 document.getElementById('reset').addEventListener('click', ()=> {
-  shuffle(cards); render(); matches=0; document.getElementById('status').textContent='Find all matching scent pairs!';
+  shuffle(cards);
+  matches = 0;
+  document.getElementById('status').textContent = "Find all matching scent pairs ✨";
+  render();
 });
+
 render();
 </script>
+
 </body>
 </html>
