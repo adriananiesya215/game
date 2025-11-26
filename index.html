@@ -13,6 +13,7 @@
     padding: 20px;
     margin: 0;
     background: #fdf9f6; /* soft spa-like background */
+    overflow-x: hidden;
   }
 
   h1 {
@@ -25,6 +26,7 @@
     grid-template-columns: repeat(4, 120px);
     gap: 12px;
     margin-top: 20px;
+    position: relative;
   }
 
   .card {
@@ -81,6 +83,18 @@
     flex-direction: column;
   }
 
+  .shop-btn {
+    margin-top: 8px;
+    padding: 4px 8px;
+    font-size: 13px;
+    background: #f7c6b0;
+    color: #6b8e86;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    display: none; /* hidden by default */
+  }
+
   #status {
     margin-top: 14px;
     color: #6b8e86;
@@ -97,15 +111,17 @@
     font-size: 14px;
   }
 
-  .shop-btn {
-    margin-top: 8px;
-    padding: 4px 8px;
-    font-size: 13px;
-    background: #f7c6b0;
-    color: #6b8e86;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
+  .petal {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    animation: drop 2s linear forwards;
+  }
+
+  @keyframes drop {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(250px) rotate(360deg); opacity: 0; }
   }
 
   @media(max-width:520px){
@@ -135,7 +151,6 @@ const scents = [
 
 // Duplicate scents for pairs
 let cards = scents.concat(scents).map((c,i)=>({...c, id:i+1}));
-
 shuffle(cards);
 
 const board = document.getElementById('board');
@@ -151,7 +166,7 @@ function createCard(item){
       <div class="card-front">🛁</div>
       <div class="card-back">
         ${item.name}<br>
-        <button class="shop-btn" onclick="window.location='${item.url}'">Shop this scent</button>
+        <button class="shop-btn" onclick="window.open('${item.url}','_blank')">Shop this scent</button>
       </div>
     </div>
   `;
@@ -177,6 +192,13 @@ function checkMatch(){
   const a=first.dataset.name, b=second.dataset.name;
   if(a===b){
     matches +=1;
+    // Show shop buttons
+    first.querySelector('.shop-btn').style.display='inline-block';
+    second.querySelector('.shop-btn').style.display='inline-block';
+
+    triggerPetals(first);
+    triggerPetals(second);
+
     first.removeEventListener('click', ()=>flipCard);
     second.removeEventListener('click', ()=>flipCard);
     resetTurn();
@@ -205,6 +227,18 @@ function shuffle(array){
 document.getElementById('reset').addEventListener('click', ()=> {
   shuffle(cards); render(); matches=0; document.getElementById('status').textContent='Find all matching scent pairs!';
 });
+
+function triggerPetals(card){
+  for(let i=0;i<8;i++){
+    const petal = document.createElement('div');
+    petal.className='petal';
+    petal.textContent = ['🌸','🍓','🍑','🍋'][Math.floor(Math.random()*4)];
+    petal.style.left = (Math.random()*100)+'%';
+    petal.style.top = (Math.random()*-50)+'px';
+    card.appendChild(petal);
+    setTimeout(()=> card.removeChild(petal), 2000);
+  }
+}
 
 render();
 </script>
